@@ -1,0 +1,261 @@
+/* ============================================================
+   FACTURATION 2026 — documents du pack (checklist, guide, mémo)
+   Feuilles A4 imprimables, même identité « dossier d'échéance ».
+   ============================================================ */
+:root {
+  --nuit: #0E1B2D;
+  --papier: #F4EFE2;
+  --encre: #262B36;
+  --encre-soft: #5B5F6B;
+  --verm: #C7402F;
+  --verm-deep: #A9362A;
+  --rouge-profond: #8A1F14;
+  --ambre-encre: #6B5203;
+  --bleu-lien: #243F7E;
+  --f-display: "Fraunces", "Georgia", serif;
+  --f-texte: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", Menlo, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  margin: 0;
+  font-family: var(--f-texte);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--encre);
+  background: #3A4149;
+}
+
+/* Barre outil (masquée à l'impression) */
+.barre-outil {
+  background: var(--nuit);
+  color: #fff;
+  padding: 14px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.barre-outil__titre { font-family: var(--f-display); font-weight: 600; font-size: 1.05rem; }
+.barre-outil__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-outil {
+  font: inherit;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.6);
+  color: #fff;
+  background: transparent;
+  padding: 0.5em 1em;
+  border-radius: 2px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.btn-outil--plein { background: var(--verm); border-color: var(--verm); }
+.btn-outil:hover { background: rgba(255,255,255,0.14); }
+.btn-outil--plein:hover { background: var(--rouge-profond); border-color: var(--rouge-profond); }
+
+/* Feuille A4 à l'écran */
+.feuille {
+  max-width: 210mm;
+  margin: 24px auto 60px;
+  background: #fffdf7;
+  padding: 18mm 16mm 16mm;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+}
+
+/* En-tête document */
+.doc-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  border-bottom: 2px solid var(--nuit);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+.doc-entete__marque {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--nuit);
+}
+.doc-entete__marque b { color: var(--verm); }
+.doc-entete__ref {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--encre-soft);
+  text-align: right;
+  line-height: 1.9;
+}
+.tampon-print {
+  display: inline-block;
+  font-family: var(--f-mono);
+  font-weight: 600;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: 2.5px double var(--rouge-profond);
+  color: var(--rouge-profond);
+  padding: 3px 10px 2px;
+  border-radius: 3px;
+  transform: rotate(-2deg);
+}
+
+/* Typographie document */
+h1 {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.12;
+  margin: 0 0 8px;
+  color: var(--nuit);
+}
+h2 {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin: 26px 0 10px;
+  color: var(--nuit);
+  border-bottom: 1px solid #D9CFBA;
+  padding-bottom: 5px;
+}
+h3 { font-size: 1rem; margin: 18px 0 6px; color: var(--verm-deep); }
+p { margin: 0 0 10px; }
+.sous-titre { color: var(--encre-soft); font-size: 0.95rem; margin-bottom: 14px; }
+.lead { font-size: 1rem; }
+.small { font-size: 0.8rem; color: var(--encre-soft); }
+.mono { font-family: var(--f-mono); font-size: 0.75rem; letter-spacing: 0.06em; }
+
+/* Encadrés */
+.encadre {
+  border: 1px solid #D9CFBA;
+  background: var(--papier);
+  padding: 12px 16px;
+  border-radius: 3px;
+  margin: 14px 0;
+  font-size: 0.92rem;
+}
+.encadre--rouge { border-left: 5px solid var(--verm); }
+.encadre--bleu { border-left: 5px solid var(--bleu-lien); }
+.encadre--ambre { border-left: 5px solid #B7791F; }
+
+/* Checklist */
+.check-item {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px dotted #C9BFA9;
+  break-inside: avoid;
+}
+.check-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--verm);
+  margin-top: 3px;
+}
+.check-item__titre { font-weight: 600; }
+.check-item__detail { font-size: 0.88rem; color: var(--encre-soft); }
+
+/* Liste guide */
+ol.guide, ul.guide { padding-left: 22px; }
+ol.guide li, ul.guide li { margin-bottom: 8px; break-inside: avoid; }
+ol.guide li strong, ul.guide li strong { color: var(--nuit); }
+
+/* Tableau */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin: 12px 0;
+}
+th, td {
+  border: 1px solid #D9CFBA;
+  padding: 7px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--papier); font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* Signature */
+.signature {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 34px;
+  font-size: 0.9rem;
+}
+.signature .ligne { border-bottom: 1px solid var(--encre); height: 34px; }
+.signature .libelle { font-size: 0.72rem; color: var(--encre-soft); margin-top: 4px; }
+.signature__date { text-align: right; }
+
+/* Pied de document */
+.pied-doc {
+  margin-top: 34px;
+  border-top: 1px solid #D9CFBA;
+  padding-top: 10px;
+  font-size: 0.72rem;
+  color: var(--encre-soft);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Mentions (mémo) */
+.mention {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px dotted #C9BFA9;
+  break-inside: avoid;
+}
+.mention__num {
+  font-family: var(--f-mono);
+  font-weight: 600;
+  color: var(--verm-deep);
+  font-size: 0.85rem;
+}
+.mention__titre { font-weight: 600; }
+.mention__detail { font-size: 0.88rem; color: var(--encre-soft); }
+.mention__badge {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  white-space: nowrap;
+  align-self: center;
+}
+.mention__badge--2026 { color: var(--rouge-profond); border-color: var(--rouge-profond); }
+.mention__badge--classique { color: var(--bleu-lien); border-color: var(--bleu-lien); }
+.mention__badge--cas { color: var(--ambre-encre); border-color: var(--ambre-encre); }
+
+/* Impression A4 */
+@page { size: A4; margin: 14mm 12mm; }
+@media print {
+  body { background: #fff; font-size: 12.5px; }
+  .barre-outil { display: none; }
+  .feuille { max-width: none; margin: 0; padding: 0; box-shadow: none; background: #fff; }
+  .encadre, .check-item, .mention, ol.guide li, ul.guide li { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+}
+@media (max-width: 640px) {
+  .feuille { margin: 0; padding: 22px 18px 40px; box-shadow: none; }
+  .signature { grid-template-columns: 1fr; }
+  .doc-entete { flex-direction: column; }
+  .doc-entete__ref { text-align: left; }
+}

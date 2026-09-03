@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic « Prêt à recevoir ? » — Facturation électronique 2026</title>
+<meta name="description" content="Six questions pour savoir si votre entreprise est prête à recevoir les factures électroniques depuis le 1er septembre 2026. Score de conformité 0-100 et plan d'action immédiat.">
+<meta name="robots" content="index, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body id="haut">
+
+<header class="en-tete">
+  <div class="en-tete__in">
+    <a class="en-tete__marque" href="index.html" aria-label="Facturation 2026 — retour à l'accueil">Facturation <b>26</b></a>
+    <nav class="en-tete__nav" aria-label="Navigation">
+      <a class="en-tete__lien" href="index.html#reglementaire">La réforme</a>
+      <a class="en-tete__lien" href="index.html#pack">Le pack</a>
+      <a class="btn btn-primaire" href="index.html#commande">Précommander (29 €)</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="check-hero" aria-labelledby="titre-check">
+    <div class="conteneur">
+      <span class="chapeau">Auto-diagnostic réglementaire</span>
+      <h1 id="titre-check">Prêt à recevoir ?</h1>
+      <p>Depuis le 1er septembre 2026, votre entreprise (assujettie à la TVA, établie en France) doit pouvoir recevoir des factures électroniques. Répondez honnêtement aux six questions : le score et le plan d'action s'affichent à la fin.</p>
+    </div>
+  </section>
+
+  <section class="check-body" aria-label="Questions du diagnostic">
+    <div class="check-card" id="diagnostic">
+      <div class="progression" aria-hidden="true">
+        <div class="progression__barre" data-progression></div>
+      </div>
+
+      <form id="form-diagnostic" novalidate>
+        <div id="questions"></div>
+
+        <div class="check-actions">
+          <p style="margin:0; font-size:0.9rem; color:var(--encre-soft);">Question <span data-compteur>1</span> / 6</p>
+          <button type="submit" class="btn btn-primaire" id="btn-resultat" disabled>Voir mon résultat</button>
+        </div>
+      </form>
+
+      <div class="resultat" id="resultat" aria-live="polite"></div>
+    </div>
+
+    <div class="conteneur" style="max-width:860px; margin-top:28px;">
+      <p style="font-size:0.85rem; color:var(--encre-soft);">Cet outil est un point de départ pratique, pas un conseil fiscal ou juridique. Votre situation précise (franchise en base, régime de TVA, secteur) doit être validée par un expert-comptable ou un conseil. <a href="index.html#pied">Sources officielles</a>.</p>
+    </div>
+  </section>
+
+  <!-- Bandeau final : récupération du pack -->
+  <section class="section section--nuit" id="suite" style="padding-top:0;">
+    <div class="conteneur" style="padding-top:clamp(50px,8vh,90px);">
+      <span class="chapeau">La suite</span>
+      <h2 class="h2">Un score, puis un plan. Le pack fait le reste.</h2>
+      <p class="intro">La checklist « Prêt à recevoir » (12 points), le guide de choix de plateforme et le mémo des mentions obligatoires : 29 € au lieu de 49 €, livrés par email sous 24 h ouvrées.</p>
+      <div style="margin-top:28px; display:flex; flex-wrap:wrap; gap:16px; align-items:center;">
+        <a class="btn btn-primaire" href="index.html#commande">Précommander le pack (29 €)</a>
+        <a class="btn btn-nuit" href="index.html">Revenir à l'accueil</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <div class="conteneur">
+    <div class="pied__grille">
+      <div>
+        <h3>Facturation électronique 2026</h3>
+        <p>Pack « Prêt à recevoir » : mise en conformité réception pour les TPE et PME françaises. Édité par Demba Koita-Laha, France.</p>
+      </div>
+      <div>
+        <h3>Sources officielles</h3>
+        <ul class="pied__sources">
+          <li><a href="https://www.economie.gouv.fr/tout-savoir-sur-la-facturation-electronique-pour-les-entreprises" target="_blank" rel="noopener">economie.gouv.fr — Tout savoir sur la facturation électronique</a></li>
+          <li><a href="https://www.impots.gouv.fr/professionnel/je-decouvre-la-facturation-electronique" target="_blank" rel="noopener">impots.gouv.fr — Je découvre la facturation électronique</a></li>
+          <li><a href="https://entreprendre.service-public.fr/vosdroits/A15683" target="_blank" rel="noopener">service-public.fr — Facturation électronique</a></li>
+        </ul>
+      </div>
+      <div id="rgpd">
+        <h3>Données personnelles</h3>
+        <p>Les informations du formulaire servent uniquement à traiter votre demande. Elles ne sont ni revendues ni conservées au-delà de la relation. Droit d'accès et de suppression : <a href="mailto:agentiadeploiement@gmail.com">agentiadeploiement@gmail.com</a>.</p>
+      </div>
+    </div>
+    <div class="pied__disclaimer">
+      <p>Ce diagnostic est un outil d'auto-contrôle, pas un conseil fiscal, comptable ou juridique. Réglementation en vigueur au 3 septembre 2026 : vérifiez toujours le calendrier officiel, susceptible d'évoluer.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js" defer></script>
+<script src="js/prix.js" defer></script>
+<script src="js/emailjs-config.js" defer></script>
+<script src="js/lead.js" defer></script>
+<!-- diagnostic.js est chargé en synchrone : le contrôleur UI ci-dessous en dépend immédiatement -->
+<script src="js/diagnostic.js"></script>
+<script>
+/* Contrôleur UI du diagnostic — utilise le moteur pur js/diagnostic.js.
+   Aucun framework. Le calcul est testable séparément (node --check + require). */
+(function () {
+  'use strict';
+
+  var Diagnostic = window.Diagnostic;
+  if (!Diagnostic) return;
+
+  var QUESTIONS = Diagnostic.QUESTIONS;
+  var reponses = [];
+  var zoneQuestions = document.getElementById('questions');
+  var btn = document.getElementById('btn-resultat');
+  var barre = document.querySelector('[data-progression]');
+  var compteur = document.querySelector('[data-compteur]');
+
+  QUESTIONS.forEach(function (q, i) {
+    reponses.push(null);
+    var article = document.createElement('div');
+    article.className = 'question';
+    article.innerHTML =
+      '<p class="question__texte">' + (i + 1) + '. ' + q.texte + '</p>' +
+      '<p class="question__aide">' + q.aide + '</p>' +
+      '<div class="reponses" role="radiogroup" aria-label="Question ' + (i + 1) + '">' +
+        '<label class="oui-b"><input type="radio" name="q' + i + '" value="oui" aria-label="Oui"><span>Oui</span></label>' +
+        '<label class="non-b"><input type="radio" name="q' + i + '" value="non" aria-label="Non"><span>Non</span></label>' +
+      '</div>';
+    zoneQuestions.appendChild(article);
+
+    article.querySelectorAll('input').forEach(function (radio) {
+      radio.addEventListener('change', function () {
+        reponses[i] = radio.value === 'oui';
+        article.querySelectorAll('label').forEach(function (lab) {
+          lab.classList.toggle('choisie', lab.querySelector('input').checked);
+        });
+        var repondu = reponses.filter(function (r) { return r !== null; }).length;
+        barre.style.width = Math.round((repondu / QUESTIONS.length) * 100) + '%';
+        compteur.textContent = String(Math.min(repondu + 1, QUESTIONS.length));
+        btn.disabled = repondu < QUESTIONS.length;
+      });
+    });
+  });
+
+  document.getElementById('form-diagnostic').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (reponses.some(function (r) { return r === null; })) return;
+
+    var resultat = Diagnostic.calcDiagnostic(reponses);
+    var v = resultat.verdict;
+    var zone = document.getElementById('resultat');
+    var circ = 2 * Math.PI * 54; // r = 54
+
+    var couleur = '#C7402F';
+    if (v.code === 'EN BONNE VOIE') couleur = '#2F6B43';
+    if (v.code === 'À TRAITER') couleur = '#B7791F';
+
+    var plan = v.plan.map(function (p) { return '<li>' + p + '</li>'; }).join('');
+
+    zone.className = 'resultat resultat--visible';
+    zone.innerHTML =
+      '<div class="resultat__tete">' +
+        '<div class="jauge" aria-hidden="true">' +
+          '<svg width="150" height="150" viewBox="0 0 150 150">' +
+            '<circle class="jauge__anneau-bg" cx="75" cy="75" r="54"></circle>' +
+            '<circle class="jauge__anneau" id="anneau" cx="75" cy="75" r="54" style="stroke:' + couleur + '; stroke-dasharray:' + circ + '; stroke-dashoffset:' + circ + ';"></circle>' +
+          '</svg>' +
+          '<div class="jauge__texte"><span><span id="score-num">0</span><br><small>/ 100</small></span></div>' +
+        '</div>' +
+        '<div>' +
+          '<p class="resultat__verdict" style="color:' + couleur + ';">' + v.code + '</p>' +
+          '<p class="resultat__titre">' + v.libelle + '</p>' +
+          '<p class="resultat__desc">' + v.description + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="resultat__plan">' +
+        '<h3>Votre plan d\'action</h3>' +
+        '<ol>' + plan + '</ol>' +
+      '</div>' +
+      '<div class="resultat__cta">' +
+        '<a class="btn btn-primaire" href="index.html#commande">Précommander le pack (29 €)</a>' +
+        '<a class="btn btn-papier" href="index.html">Revenir à l\'accueil</a>' +
+      '</div>' +
+      '<p class="resultat__note">Si vous avez répondu « non » à la première question, vérifiez votre régime de TVA : en franchise en base, la réception obligatoire ne s\'applique pas à vous (voir situation n° 3 sur la page d\'accueil).</p>';
+
+    /* Animation score + jauge — robuste (valeur finale posée même si rAF est gelé ;
+       la transition CSS anime l'anneau quand le navigateur le permet). */
+    var anneau = document.getElementById('anneau');
+    var num = document.getElementById('score-num');
+    var cible = resultat.score;
+    var decalageFinal = circ * (1 - cible / 100);
+    window.setTimeout(function () {
+      if (anneau) anneau.style.strokeDashoffset = String(decalageFinal);
+      if (num) num.textContent = String(cible);
+    }, 40);
+
+    zone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+})();
+</script>
+</body>
+</html>
