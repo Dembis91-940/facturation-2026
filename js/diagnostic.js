@@ -14,7 +14,7 @@
     {
       id: 'q2',
       texte: 'J\'ai désigné une plateforme de dématérialisation (PDP) ou j\'utilise le portail public (PPF) pour recevoir mes factures électroniques.',
-      aide: 'Depuis le 01/09/2026, les factures électroniques se reçoivent par une plateforme, plus par simple email ou PDF non structuré.'
+      aide: 'Depuis le 01/09/2026, les factures électroniques ne se reçoivent plus par simple email : une plateforme est nécessaire.'
     },
     {
       id: 'q3',
