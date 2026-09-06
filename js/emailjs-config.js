@@ -1,5 +1,5 @@
 /* Configuration EmailJS — clé publique (conçue pour être publique).
-   Toute demande (lead, question, précommande) notifie l'éditeur
+   Toute demande (commande, lead, question) notifie l'éditeur
    sur agentiadeploiement@gmail.com via le template existant. */
 (function (root) {
   'use strict';

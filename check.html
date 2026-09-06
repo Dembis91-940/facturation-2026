@@ -19,7 +19,7 @@
     <nav class="en-tete__nav" aria-label="Navigation">
       <a class="en-tete__lien" href="index.html#reglementaire">La réforme</a>
       <a class="en-tete__lien" href="index.html#pack">Le pack</a>
-      <a class="btn btn-primaire" href="index.html#commande">Précommander (29 €)</a>
+      <a class="btn btn-primaire" href="index.html#commande">Commander (29 €)</a>
     </nav>
   </div>
 </header>
@@ -63,7 +63,7 @@
       <h2 class="h2">Un score, puis un plan. Le pack fait le reste.</h2>
       <p class="intro">La checklist « Prêt à recevoir » (12 points), le guide de choix de plateforme et le mémo des mentions obligatoires : 29 € au lieu de 49 €, livrés par email sous 24 h ouvrées.</p>
       <div style="margin-top:28px; display:flex; flex-wrap:wrap; gap:16px; align-items:center;">
-        <a class="btn btn-primaire" href="index.html#commande">Précommander le pack (29 €)</a>
+        <a class="btn btn-primaire" href="index.html#commande">Commander le pack (29 €)</a>
         <a class="btn btn-nuit" href="index.html">Revenir à l'accueil</a>
       </div>
     </div>
@@ -157,6 +157,16 @@
     var couleur = '#C7402F';
     if (v.code === 'EN BONNE VOIE') couleur = '#2F6B43';
     if (v.code === 'À TRAITER') couleur = '#B7791F';
+    if (v.code === 'HORS PÉRIMÈTRE') couleur = '#243F7E';
+
+    var horsPerimetre = v.code === 'HORS PÉRIMÈTRE';
+    var ctaHtml = horsPerimetre
+      ? '<a class="btn btn-papier" href="index.html">Revenir à l\'accueil</a>'
+      : '<a class="btn btn-primaire" href="index.html#commande">Commander le pack (29 €)</a>' +
+        '<a class="btn btn-papier" href="index.html">Revenir à l\'accueil</a>';
+    var noteHtml = horsPerimetre
+      ? 'Ce résultat est un point de départ : la notion d\'assujettissement a des cas limites (associations, exonérations, seuils). Faites confirmer votre régime par un expert-comptable. Si vous êtes en franchise en base de TVA (micro-entrepreneur), vous êtes en réalité concerné·e — répondez « oui » à la question 1 et refaites le diagnostic.'
+      : 'Attention : les entreprises en franchise en base de TVA (micro-entrepreneurs) ne sont pas redevables de la TVA, mais elles restent assujetties — elles sont donc concernées par la facturation électronique, en réception comme en émission (voir situation n° 3 sur la page d\'accueil). Seules les activités réellement non assujetties sont hors du périmètre.';
 
     var plan = v.plan.map(function (p) { return '<li>' + p + '</li>'; }).join('');
 
@@ -180,11 +190,8 @@
         '<h3>Votre plan d\'action</h3>' +
         '<ol>' + plan + '</ol>' +
       '</div>' +
-      '<div class="resultat__cta">' +
-        '<a class="btn btn-primaire" href="index.html#commande">Précommander le pack (29 €)</a>' +
-        '<a class="btn btn-papier" href="index.html">Revenir à l\'accueil</a>' +
-      '</div>' +
-      '<p class="resultat__note">Si vous avez répondu « non » à la première question, vérifiez votre régime de TVA : en franchise en base, la réception obligatoire ne s\'applique pas à vous (voir situation n° 3 sur la page d\'accueil).</p>';
+      '<div class="resultat__cta">' + ctaHtml + '</div>' +
+      '<p class="resultat__note">' + noteHtml + '</p>';
 
     /* Animation score + jauge — robuste (valeur finale posée même si rAF est gelé ;
        la transition CSS anime l'anneau quand le navigateur le permet). */

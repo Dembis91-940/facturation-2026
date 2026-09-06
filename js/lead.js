@@ -1,17 +1,19 @@
 /* ============================================================
-   FACTURATION 2026 — envoi des formulaires (leads + précommandes)
-   via EmailJS. Aucun envoi simulé : si EmailJS échoue, on affiche
-   une erreur réelle à l'utilisateur.
+   FACTURATION 2026 — envoi des formulaires (commandes + leads)
+   via EmailJS. Une commande (sujet = commande) capture le lead PUIS
+   redirige vers le paiement Stripe réel (js/paiement.js).
+   Aucun envoi simulé : si EmailJS échoue, on affiche une erreur réelle.
    ============================================================ */
 (function () {
   'use strict';
 
   var config = window.EMAILJS_CONFIG || {};
   var prix = window.PRIX || {};
+  var paiement = window.PAIEMENT || {};
 
   function texteSujet(valeur) {
     if (valeur === 'commande') {
-      return 'PRÉCOMMANDE — ' + (prix.produit || 'Pack') + ' ' + prix.montant + ' ' + (prix.devise || '€');
+      return 'COMMANDE — ' + (prix.produit || 'Pack') + ' ' + prix.montant + ' ' + (prix.devise || '€');
     }
     if (valeur === 'question') {
       return 'QUESTION — ' + (config.site || 'Facturation 2026');
@@ -71,6 +73,14 @@
       email: email.value.trim(),
       question: question
     }).then(function () {
+      if (estCommande(form)) {
+        /* Lead capté : la commande est notifiée à l'éditeur, on envoie
+           l'acheteur vers le paiement réel (lien Stripe, pattern écosystème). */
+        etat('ok', 'Commande enregistrée ! Redirection vers le paiement sécurisé (' + (paiement.libelle || 'Stripe') + ')…');
+        if (bouton) { bouton.textContent = 'Redirection vers le paiement…'; }
+        redirigerVersPaiement();
+        return;
+      }
       etat('ok', 'Votre demande est bien partie. Réponse sous 24 h ouvrées sur ' + email.value.trim() + '.');
       form.reset();
       restaurer();
@@ -88,6 +98,18 @@
         envoyer(form);
       });
     });
+  }
+
+  function estCommande(form) {
+    var sujet = form.querySelector('[name="sujet"]');
+    return !sujet || sujet.value === 'commande';
+  }
+
+  function redirigerVersPaiement() {
+    if (!paiement.url) return;
+    window.setTimeout(function () {
+      window.location.href = paiement.url;
+    }, paiement.delaiRedirectionMs || 1500);
   }
 
   if (document.readyState === 'loading') {

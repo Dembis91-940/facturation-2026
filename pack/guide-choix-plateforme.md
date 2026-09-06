@@ -44,7 +44,7 @@ Depuis le 1er septembre 2026, les entreprises assujetties à la TVA reçoivent l
 
 ## 5. Les cinq étapes pour désigner votre plateforme
 
-1. Confirmez votre obligation (assujettie à la TVA, établie en France, hors franchise en base).
+1. Confirmez votre obligation (établie en France et assujettie à la TVA — y compris en franchise en base, qui ne dispense pas).
 2. Listez 2 à 3 candidats (PDP immatriculées ou PPF) en tenant compte de votre logiciel de comptabilité.
 3. Posez les dix questions ci-dessus et comparez les réponses par écrit.
 4. Testez : recevez une facture de test, faites-la circuler jusqu'à votre comptabilité, vérifiez l'archivage.

@@ -8,8 +8,8 @@
   var QUESTIONS = [
     {
       id: 'q1',
-      texte: 'Mon entreprise est établie en France et assujettie à la TVA (hors franchise en base de TVA).',
-      aide: 'Si vous êtes en franchise en base de TVA (ex. micro-entrepreneur non redevable), la réception obligatoire ne s\'applique pas à vous.'
+      texte: 'Mon entreprise est établie en France et assujettie à la TVA (y compris en franchise en base de TVA).',
+      aide: 'Toutes les entreprises assujetties établies en France sont concernées, y compris les micro-entrepreneurs en franchise en base (ils restent assujettis à la TVA). Répondez « non » uniquement si votre activité n\'est pas assujettie.'
     },
     {
       id: 'q2',
@@ -39,6 +39,17 @@
   ];
 
   var VERDICTS = {
+    horsPerimetre: {
+      code: 'HORS PÉRIMÈTRE',
+      libelle: 'La réception obligatoire ne semble pas s\'appliquer à votre activité',
+      description: 'Si votre entreprise n\'est pas assujettie à la TVA (activité hors champ ou exonérée), l\'obligation de recevoir des factures électroniques ne s\'applique pas directement à elle. Attention : la franchise en base de TVA ne dispense pas — un micro-entrepreneur en franchise reste assujetti et reste donc concerné.',
+      plan: [
+        'Confirmez votre régime avec votre expert-comptable (assujetti ou non, champ d\'application).',
+        'Si vous êtes en franchise en base de TVA : vous êtes concerné, désignez une plateforme et référencez-vous dans l\'annuaire.',
+        'Surveillez les seuils de franchise : un dépassement vous rend redevable et l\'obligation s\'allume.',
+        'Dès que vous facturez des entreprises assujetties, vérifiez que vous pouvez recevoir leurs factures électroniques.'
+      ]
+    },
     urgent: {
       code: 'URGENT',
       libelle: 'Action requise dès cette semaine',
@@ -93,7 +104,9 @@
     var score = Math.round((oui / QUESTIONS.length) * 100);
 
     var verdict;
-    if (oui <= 2) {
+    if (reponses[0] === false) {
+      verdict = VERDICTS.horsPerimetre;
+    } else if (oui <= 2) {
       verdict = VERDICTS.urgent;
     } else if (oui <= 4) {
       verdict = VERDICTS.traiter;
