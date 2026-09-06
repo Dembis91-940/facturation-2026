@@ -1,0 +1,700 @@
+/* ============================================================================
+   FACTURATION 2026 · refonte scrollcraft v0.3.0 — identité « dossier officiel »
+   ============================================================================
+   Le site est un dossier d'échéance que l'on feuillette. Chaque feuillet
+   (chapitre) retombe sur son propre fond : papier pour la lecture, nuit pour
+   l'officiel et l'urgence. Coupes franches, jamais de drift continu.
+   Règles : ne jamais restyler .sc-stage ni les sélecteurs [data-sc-*] (ce sont
+   les mécanismes de l'engine) ; tout le reste appartient à cette feuille.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------- tokens -- */
+:root {
+  /* rôles engine : un accent (verm) pour toute la page, deux fonds (papier/nuit).
+     Sur une page à coupes papier/nuit, le token ink est redéfini par feuillet. */
+  --sc-canvas:      #F4EFE2;   /* papier du dossier */
+  --sc-surface:     #FBF7EC;
+  --sc-ink:         #262B36;
+  --sc-ink-soft:    #5B5F6B;
+  --sc-accent:      #C7402F;   /* verm, le rouge de l'administration */
+  --sc-accent-ink:  #FFFFFF;
+  --sc-hairline:    color-mix(in oklab, #262B36 16%, transparent);
+  --sc-hairline-strong: color-mix(in oklab, #262B36 34%, transparent);
+  --sc-font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --sc-font-text:    "IBM Plex Sans", system-ui, sans-serif;
+  --sc-font-mono:    "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --sc-r-sm: 2px; --sc-r-md: 4px; --sc-r-lg: 6px; --sc-r-pill: 999px;
+  --sc-shadow-color: 38 8% 12%;
+  --sc-e1: 0 1px 2px hsl(var(--sc-shadow-color) / 0.10), 0 2px 8px -2px hsl(var(--sc-shadow-color) / 0.08);
+  --sc-e2: 0 2px 6px hsl(var(--sc-shadow-color) / 0.10), 0 10px 26px -8px hsl(var(--sc-shadow-color) / 0.16);
+  --sc-e3: 0 6px 14px hsl(var(--sc-shadow-color) / 0.12), 0 26px 60px -20px hsl(var(--sc-shadow-color) / 0.26);
+
+  /* palette du dossier (héritée de la v1, codes conservés) */
+  --nuit:        #0E1B2D;
+  --nuit-2:      #13233A;
+  --nuit-3:      #1A2C47;
+  --nuit-peak:   #091522;
+  --papier:      #F4EFE2;
+  --papier-2:    #ECE4D2;
+  --papier-3:    #E4DAC2;
+  --blanc:       #FDFBF5;
+  --ivoire:      #F3EDDD;
+  --encre:       #262B36;
+  --encre-soft:  #5B5F6B;
+  --gris-nuit:   #7F8CA3;
+  --gris-nuit-2: #A9B4C4;
+  --verm:        #C7402F;
+  --verm-deep:   #A9362A;
+  --rouge-profond: #8A1F14;
+  --ambre:       #E9A13B;
+  --ambre-encre: #6B5203;
+  --bleu-lien:   #243F7E;
+  --ok:          #2F6B43;
+  --ok-soft:     #CFE3D2;
+  --folio-h:     54px;
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--sc-canvas); overflow-x: clip; }
+[id] { scroll-margin-top: calc(var(--folio-h) + 26px); }
+
+::selection { background: var(--verm); color: #fff; }
+:focus-visible { outline: 2px solid var(--verm); outline-offset: 3px; }
+.mono { font-family: var(--sc-font-mono); letter-spacing: 0.01em; }
+
+/* grain : plus discret sur le papier que sur fond sombre */
+.sc-grain { opacity: 0.03; }
+
+/* barre de progression = la règle rouge qui court sous le folio */
+[data-sc-progress] { top: calc(var(--folio-h) - 2px); height: 2px; background: var(--verm); }
+
+/* ----------------------------------------------------------------- boutons -- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.55em;
+  font-family: var(--sc-font-text); font-weight: 600; font-size: 0.98rem;
+  line-height: 1; text-decoration: none; cursor: pointer;
+  padding: 0.92em 1.35em; border-radius: var(--sc-r-sm);
+  border: 1.5px solid transparent; background: transparent; color: inherit;
+  transition: background var(--sc-d-fast) var(--sc-ease-out), color var(--sc-d-fast) var(--sc-ease-out),
+              border-color var(--sc-d-fast) var(--sc-ease-out), transform 120ms var(--sc-ease-out);
+  white-space: nowrap;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primaire {
+  background: var(--verm); color: #fff;
+  box-shadow: 0 2px 0 var(--rouge-profond);
+}
+.btn-primaire:hover { background: var(--rouge-profond); color: #fff; }
+.btn-primaire:focus-visible { outline-color: var(--rouge-profond); }
+.btn-ligne { border-color: var(--encre); color: var(--encre); background: transparent; }
+.btn-ligne:hover { background: var(--encre); color: var(--papier); }
+.btn-papier { background: var(--encre); color: var(--papier); }
+.btn-papier:hover { background: #11151d; }
+.btn--grand { font-size: 1.06rem; padding: 1.05em 1.55em; }
+.btn--bloc { width: 100%; }
+@media (hover: none) { .btn:active { transform: translateY(1px); } }
+
+/* ------------------------------------------------------------------ folio -- */
+.folio {
+  position: fixed; inset: 0 0 auto 0; height: var(--folio-h);
+  z-index: var(--sc-z-chrome); display: flex; align-items: center;
+  border-bottom: 1px solid transparent;
+  transition: background 320ms var(--sc-ease-out), color 320ms var(--sc-ease-out);
+}
+.folio__in {
+  width: 100%; max-width: var(--sc-maxw); margin-inline: auto;
+  padding-inline: var(--sc-gutter);
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+}
+.folio__marque {
+  font-family: var(--sc-font-display); font-weight: 600; font-size: 1.22rem;
+  text-decoration: none; color: inherit; line-height: 1;
+}
+.folio__marque b { color: var(--ambre); font-weight: 600; }
+.folio__titre {
+  margin: 0; display: flex; align-items: center; gap: 12px;
+  font-size: 0.68rem; letter-spacing: 0.14em; opacity: 0.85;
+  overflow: hidden; white-space: nowrap;
+}
+.folio__no { font-weight: 600; }
+.folio__nom { opacity: 0.6; }
+.folio__actions { display: flex; align-items: center; gap: 14px; }
+.folio__lien {
+  font-size: 0.86rem; font-weight: 500; text-decoration: none;
+  color: inherit; opacity: 0.78; transition: opacity var(--sc-d-fast) var(--sc-ease-out);
+}
+.folio__lien:hover { opacity: 1; text-decoration: underline; text-underline-offset: 0.24em; }
+.folio .btn { font-size: 0.82rem; padding: 0.6em 0.95em; }
+
+/* fond du folio = fond du feuillet qui passe dessous (bascule JS data-ground) */
+body[data-ground="papier"] .folio,
+body[data-ground="papier-2"] .folio { background: color-mix(in oklab, var(--papier) 92%, transparent); color: var(--encre); border-bottom-color: var(--sc-hairline); }
+body[data-ground="blanc"] .folio { background: color-mix(in oklab, var(--blanc) 92%, transparent); color: var(--encre); border-bottom-color: var(--sc-hairline); }
+body[data-ground="nuit"] .folio,
+body[data-ground="peak"] .folio { background: color-mix(in oklab, var(--nuit) 90%, transparent); color: var(--ivoire); border-bottom-color: color-mix(in oklab, var(--ivoire) 18%, transparent); }
+body[data-ground="nuit"] .folio .btn-primaire,
+body[data-ground="peak"] .folio .btn-primaire { box-shadow: 0 2px 0 #5c1208; }
+
+/* -------------------------------------------------------------- feuillets -- */
+.feuillet { position: relative; overflow: clip; }
+.feuillet--nuit, .feuillet--peak {
+  --sc-surface: var(--nuit-2);
+  --sc-hairline: color-mix(in oklab, var(--ivoire) 16%, transparent);
+  --sc-hairline-strong: color-mix(in oklab, var(--ivoire) 30%, transparent);
+}
+.feuillet--nuit  { background: var(--nuit); color: var(--ivoire); }
+.feuillet--peak  { background: var(--nuit-peak); color: var(--ivoire); }
+.feuillet--papier { background: var(--papier); color: var(--encre); }
+.feuillet--papier-2 { background: var(--papier-2); color: var(--encre); }
+.feuillet--blanc  { background: var(--blanc); color: var(--encre); }
+
+/* titres de chapitre : plus d'air au-dessus qu'en dessous (la coupure
+   appartient à la frontière, pas au couple titre-texte) */
+.ch-tete { max-width: 58rem; padding-top: clamp(2.6rem, 6vh, 4.6rem); }
+.ch-tete__titre {
+  font-family: var(--sc-font-display); font-weight: 600;
+  font-size: clamp(1.85rem, 3.6vw, 3.05rem);
+  line-height: 1.07; letter-spacing: -0.018em; text-wrap: balance;
+  margin: 0 0 var(--sc-6);
+}
+.ch-tete__lede {
+  font-size: var(--sc-t-lg); line-height: 1.5; color: var(--sc-ink-soft);
+  max-width: 52ch; margin: 0 0 clamp(2.6rem, 6vh, 4.4rem); text-wrap: pretty;
+}
+
+/* ================================================================== 
+   FEUILLET 01 · COUVERTURE
+   ================================================================== */
+.couverture {
+  min-height: 100svh; display: flex; flex-direction: column;
+  justify-content: center;
+  padding-block: calc(var(--folio-h) + clamp(2rem, 6vh, 4rem)) clamp(2.4rem, 6vh, 5rem);
+  background: var(--papier); color: var(--encre);
+}
+.couverture__plans { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.couverture__plans span { position: absolute; display: block; line-height: 1; }
+.couverture__filigrane {
+  top: -1.5%; left: 50%; translate: -50% 0; white-space: nowrap;
+  font-family: var(--sc-font-display); font-weight: 700;
+  font-size: clamp(4.2rem, 17vw, 16.5rem); letter-spacing: -0.035em;
+  color: transparent; -webkit-text-stroke: 1px color-mix(in oklab, var(--encre) 10%, transparent);
+  opacity: 0.9;
+}
+.couverture__filigrane-bis {
+  right: -2%; bottom: 6%; font-family: var(--sc-font-display); font-style: italic; font-weight: 600;
+  font-size: clamp(2.4rem, 7vw, 6.6rem); letter-spacing: -0.02em;
+  color: color-mix(in oklab, var(--encre) 5%, transparent);
+}
+.couverture__marge {
+  left: calc(var(--sc-gutter) * -0.2); top: 50%; rotate: 90deg; transform-origin: 0 0;
+  font-size: 0.62rem; letter-spacing: 0.42em; text-transform: uppercase;
+  color: color-mix(in oklab, var(--encre) 26%, transparent); opacity: 0.7;
+}
+.couverture__grille {
+  position: relative; z-index: 1; display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  gap: clamp(1.6rem, 5vw, 5rem); align-items: center;
+}
+.couverture__texte { max-width: 44rem; }
+.couverture__dossier { margin: 0 0 1.4rem; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--encre-soft); }
+.couverture__dossier b { color: var(--verm); font-weight: 600; }
+.couverture__sur {
+  margin: 0 0 1.1rem; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--verm-deep);
+}
+.couverture__titre {
+  font-family: var(--sc-font-display); font-weight: 600;
+  font-size: clamp(2.7rem, 7.2vw, 5.6rem);
+  line-height: 0.99; letter-spacing: -0.028em; text-wrap: balance;
+  margin: 0 0 1.6rem;
+}
+.couverture__lede {
+  font-size: clamp(1.05rem, 1.4vw, 1.24rem); line-height: 1.62; color: var(--encre-soft);
+  max-width: 46ch; margin: 0 0 1.9rem; text-wrap: pretty;
+}
+.couverture__actions { display: flex; flex-wrap: wrap; gap: 0.8rem; margin: 0 0 1.5rem; }
+.couverture__note { margin: 0; font-size: 0.72rem; line-height: 1.7; color: var(--encre-soft); max-width: 52ch; }
+.couverture__note a { color: var(--encre); font-weight: 500; }
+.couverture__socle {
+  position: relative; z-index: 1; margin: clamp(2.2rem, 6vh, 4rem) 0 0;
+  text-align: center; font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: color-mix(in oklab, var(--encre) 46%, transparent);
+}
+
+/* la feuille d'état (document) */
+.couverture__feuille { position: relative; justify-self: center; width: min(100%, 480px); }
+.feuille-doc {
+  position: relative; background: #FFFDF6; color: var(--encre);
+  border: 1px solid color-mix(in oklab, var(--encre) 22%, transparent);
+  box-shadow: var(--sc-e2);
+  padding: clamp(1.1rem, 2vw, 1.6rem) clamp(1.1rem, 2.4vw, 1.8rem) 1.3rem;
+}
+.feuille-doc__entete {
+  display: flex; justify-content: space-between; gap: 10px; align-items: baseline;
+  font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--encre-soft); padding-bottom: 0.8rem; border-bottom: 1px solid var(--sc-hairline);
+}
+.feuille-doc__code { color: var(--verm-deep); }
+.feuille-doc__lignes { margin: 1.1rem 0 0; }
+.feuille-doc__lignes > div { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: baseline; gap: 10px; padding: 0.55rem 0; border-bottom: 1px dashed color-mix(in oklab, var(--encre) 20%, transparent); }
+.feuille-doc__lignes dt { font-size: 0.86rem; font-weight: 500; }
+.feuille-doc__lignes dd { border-bottom: 1px solid color-mix(in oklab, var(--encre) 46%, transparent); height: 1.15em; }
+.feuille-doc__pied { margin: 1rem 0 0; font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--encre-soft); }
+
+/* ------------------------------------------------------------- tampons -- */
+.tampon {
+  display: inline-block; font-family: var(--sc-font-mono); font-weight: 600;
+  font-size: 0.78rem; line-height: 1.35; letter-spacing: 0.1em; text-align: center;
+  text-transform: uppercase; padding: 0.5em 0.72em;
+  border: 3px double currentColor; border-radius: 4px;
+  transform: rotate(-3deg); mix-blend-mode: multiply;
+}
+.tampon--rouge  { color: var(--rouge-profond); background: color-mix(in oklab, var(--rouge-profond) 6%, transparent); }
+.tampon--ambre  { color: var(--ambre-encre);   background: color-mix(in oklab, var(--ambre-encre) 7%, transparent); }
+.tampon--bleu   { color: var(--bleu-lien);     background: color-mix(in oklab, var(--bleu-lien) 7%, transparent); }
+.feuille-doc .tampon {
+  position: absolute; top: -1.1rem; right: -0.8rem; rotate: 6deg; font-size: 0.7rem;
+  mix-blend-mode: multiply; box-shadow: none;
+}
+
+/* ================================================================== 
+   FEUILLET 02 · LE POINT RÉGLEMENTAIRE (nuit)
+   ================================================================== */
+#reglementaire { padding-block: clamp(1.4rem, 4vh, 3rem) clamp(3.4rem, 9vh, 7rem); }
+.rep-rows { display: grid; gap: 0; max-width: 62rem; }
+.rep {
+  display: grid; grid-template-columns: minmax(170px, 0.62fr) 1.35fr;
+  column-gap: clamp(1.2rem, 3vw, 2.8rem);
+  padding-block: clamp(1.4rem, 3.4vh, 2.4rem);
+  border-top: 1px solid var(--sc-hairline-strong);
+  position: relative;
+}
+.rep:last-child { border-bottom: 1px solid var(--sc-hairline-strong); }
+.rep__date { margin: 0.15rem 0 0; font-size: 0.72rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--gris-nuit-2); grid-column: 1; }
+.rep h3 { grid-column: 2; }
+.rep__corps { grid-column: 2; }
+.rep__badge {
+  display: inline-block; margin-top: 0.7rem; font-size: 0.62rem; letter-spacing: 0.12em;
+  padding: 0.32em 0.6em; border: 1px solid currentColor; border-radius: 2px; color: inherit;
+}
+.rep--rouge .rep__badge { color: #F08A78; }
+.rep--ambre .rep__badge { color: var(--ambre); }
+.rep--bleu  .rep__badge { color: #9DB4E8; }
+.rep h3 {
+  font-family: var(--sc-font-display); font-weight: 600;
+  font-size: clamp(1.25rem, 2vw, 1.72rem); line-height: 1.18; letter-spacing: -0.01em;
+  margin: 0 0 0.7rem; text-wrap: balance;
+}
+.rep__corps { margin: 0; color: var(--gris-nuit-2); max-width: 62ch; line-height: 1.68; }
+
+/* ================================================================== 
+   FEUILLET 03 · VOTRE SITUATION (papier)
+   ================================================================== */
+#situations { padding-block: clamp(1.4rem, 4vh, 3rem) clamp(3.4rem, 9vh, 7rem); }
+.situations__pile { display: grid; gap: clamp(1.8rem, 4.5vh, 3.2rem); }
+.sform {
+  position: relative; background: var(--blanc); color: var(--encre);
+  border: 1px solid color-mix(in oklab, var(--encre) 20%, transparent);
+  box-shadow: var(--sc-e1);
+  padding: 1.4rem clamp(1.2rem, 3vw, 2.2rem) 1.7rem;
+  display: grid; gap: 0.9rem;
+}
+.sform:nth-child(2) { translate: 0.6rem 0; }
+.sform:nth-child(3) { translate: -0.6rem 0; }
+.sform__barre {
+  display: flex; justify-content: space-between; gap: 10px;
+  font-size: 0.64rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--encre-soft);
+  padding-bottom: 0.7rem; border-bottom: 1px solid var(--sc-hairline);
+}
+.sform__ref { opacity: 0.6; }
+.sform .tampon { position: absolute; top: 0.9rem; right: 1rem; }
+.sform h3 {
+  font-family: var(--sc-font-display); font-weight: 600;
+  font-size: clamp(1.4rem, 2.4vw, 1.95rem); line-height: 1.15; letter-spacing: -0.014em;
+  max-width: 30ch; margin: 0; padding-right: 9.5rem; text-wrap: balance;
+}
+.sform__corps { margin: 0; color: var(--encre-soft); max-width: 64ch; line-height: 1.66; }
+.sform__liste { list-style: none; margin: 0.2rem 0 0; padding: 0; display: grid; gap: 0.55rem; max-width: 58ch; }
+.sform__liste li {
+  position: relative; padding-left: 2rem; font-size: 0.95rem; line-height: 1.5; color: var(--encre);
+}
+.sform__liste li::before {
+  content: ""; position: absolute; left: 0; top: 0.12em; width: 0.95em; height: 0.95em;
+  border: 1.5px solid color-mix(in oklab, var(--encre) 55%, transparent); border-radius: 1px;
+  background: #fff;
+}
+.sform--rouge .sform__liste li::before { border-color: var(--rouge-profond); }
+.sform--ambre .sform__liste li::before { border-color: var(--ambre-encre); }
+.sform--bleu .sform__liste li::before { border-color: var(--bleu-lien); }
+.sform__actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.5rem; }
+
+/* ================================================================== 
+   FEUILLET 04 · L'ÉCHÉANCIER OFFICIEL (pan · nuit)
+   ================================================================== */
+#calendrier .sc-stage { background: var(--nuit); color: var(--ivoire); }
+.echeancier__filigrane {
+  position: absolute; top: 50%; left: 50%; translate: -50% -50%;
+  font-size: clamp(3rem, 9vw, 9rem); letter-spacing: 0.02em; white-space: nowrap;
+  color: transparent; -webkit-text-stroke: 1px color-mix(in oklab, var(--ivoire) 8%, transparent);
+  pointer-events: none; z-index: 0;
+}
+.echeancier__rail {
+  position: relative; z-index: 1; display: flex; align-items: center;
+  gap: clamp(1.4rem, 3.4vw, 3.4rem); width: max-content; height: 100%;
+  padding-inline: var(--sc-gutter);
+  will-change: transform;
+}
+.rail__entete { width: clamp(240px, 26vw, 400px); flex: none; }
+.rail__k { margin: 0 0 1rem; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gris-nuit-2); }
+.echeancier__titre {
+  font-family: var(--sc-font-display); font-weight: 600;
+  font-size: clamp(1.7rem, 3vw, 2.6rem); line-height: 1.08; letter-spacing: -0.016em;
+  margin: 0 0 1rem; text-wrap: balance;
+}
+.echeancier__lede { margin: 0; color: var(--gris-nuit-2); max-width: 34ch; font-size: 1rem; line-height: 1.6; }
+.jalon {
+  position: relative; width: clamp(270px, 27vw, 380px); flex: none;
+  border-top: 1px solid var(--sc-hairline-strong);
+  padding-top: 1.4rem; align-self: center;
+  opacity: 0.55; transform: translateY(0);
+  transition: opacity 460ms var(--sc-ease-out);
+}
+.jalon--fait { opacity: 0.4; }
+.jalon--ici { border-top: 3px solid var(--ambre); opacity: 1; }
+.jalon__date { margin: 0 0 0.8rem; font-size: 0.78rem; letter-spacing: 0.14em; color: var(--gris-nuit-2); }
+.jalon--ici .jalon__date { color: var(--ambre); font-weight: 600; }
+.jalon__badge { display: inline-block; margin: 0 0 1.1rem; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: #F08A78; border: 1px solid currentColor; border-radius: 2px; padding: 0.3em 0.62em; }
+.jalon--ici .jalon__badge { color: var(--ambre); border-color: var(--ambre); }
+.jalon h3 {
+  font-family: var(--sc-font-display); font-weight: 600;
+  font-size: 1.5rem; line-height: 1.15; letter-spacing: -0.01em; margin: 0 0 0.8rem;
+  text-wrap: balance;
+}
+.jalon p:not(.jalon__date):not(.jalon__badge) { margin: 0; color: var(--gris-nuit-2); line-height: 1.62; font-size: 0.95rem; }
+.jalon__lien { display: inline-block; margin-top: 1rem; color: var(--ivoire); font-weight: 500; font-size: 0.92rem; text-underline-offset: 0.24em; }
+.rail__note {
+  width: clamp(230px, 24vw, 360px); flex: none; align-self: flex-end;
+  margin: 0 0 0.5rem; font-size: 0.66rem; line-height: 1.7; letter-spacing: 0.04em;
+  color: var(--gris-nuit); border-left: 2px solid color-mix(in oklab, var(--ivoire) 22%, transparent);
+  padding-left: 1rem;
+}
+/* arrivée en séquence pilotée par --sc-p (rail latéral) : le lecteur tire
+   le ruban, les jalons arrivent dans l'ordre (jamais la première cellule) */
+@media (prefers-reduced-motion: no-preference) {
+  .echeancier__rail .jalon, .echeancier__rail .rail__note {
+    opacity: clamp(0.18, calc((var(--sc-p, 0) * 3.2 - 0.32) * 1.8), 1);
+  }
+  .jalon { transform: translateY(clamp(0px, calc((1 - var(--sc-p, 0) * 2.6) * 22px), 22px)); }
+  .jalon--ici { transform: none; }
+}
+
+/* ================================================================== 
+   FEUILLET 05 · LE PACK (papier)
+   ================================================================== */
+#pack { padding-block: clamp(1.4rem, 4vh, 3rem) clamp(3.4rem, 9vh, 7rem); }
+.ledger { display: grid; gap: 0; max-width: 66rem; margin-bottom: clamp(2.4rem, 6vh, 4.2rem); }
+.piece {
+  position: relative; display: grid;
+  grid-template-columns: 120px minmax(0, 1.05fr) minmax(0, 0.95fr) auto;
+  gap: clamp(0.9rem, 2vw, 2rem); align-items: start;
+  padding-block: clamp(1.3rem, 3vh, 2.1rem);
+  border-top: 1.5px solid var(--encre);
+}
+.piece:last-of-type { border-bottom: 1.5px solid var(--encre); }
+.piece__code { margin: 0.2rem 0 0; font-size: 0.68rem; letter-spacing: 0.16em; color: var(--verm-deep); }
+.piece__texte h3 {
+  font-family: var(--sc-font-display); font-weight: 600;
+  font-size: clamp(1.2rem, 1.9vw, 1.6rem); line-height: 1.2; letter-spacing: -0.012em;
+  margin: 0 0 0.5rem; text-wrap: balance;
+}
+.piece__texte p { margin: 0; color: var(--encre-soft); line-height: 1.6; max-width: 40ch; font-size: 0.96rem; }
+.piece__points { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+.piece__points li {
+  position: relative; padding-left: 1.5rem; font-size: 0.88rem; line-height: 1.45; color: var(--encre);
+}
+.piece__points li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 0.55em; height: 2px; background: var(--verm); }
+.piece__compte {
+  align-self: center; font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--encre-soft); border: 1px solid var(--sc-hairline-strong); border-radius: 2px;
+  padding: 0.45em 0.7em; white-space: nowrap; text-align: center;
+}
+
+/* plaque d'offre */
+.offre {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+  gap: clamp(1.4rem, 4vw, 3.4rem); align-items: center;
+  background: var(--nuit); color: var(--ivoire);
+  padding: clamp(1.5rem, 4vw, 2.8rem);
+  overflow: hidden;
+}
+.offre__estampille {
+  position: absolute; right: -0.6rem; top: -0.6rem; font-family: var(--sc-font-mono);
+  font-size: 0.62rem; line-height: 1.5; letter-spacing: 0.18em; text-align: center; text-transform: uppercase;
+  color: #F08A78; border: 3px double #F08A78; border-radius: 4px; padding: 0.55em 0.7em;
+  rotate: 6deg; mix-blend-mode: screen; opacity: 0.9;
+}
+.offre__sur { margin: 0 0 0.8rem; font-size: 0.64rem; letter-spacing: 0.2em; color: var(--gris-nuit-2); }
+.offre h3 { font-family: var(--sc-font-display); font-weight: 600; font-size: clamp(1.5rem, 2.4vw, 2.1rem); margin: 0 0 0.7rem; }
+.offre__prix { margin: 0 0 0.7rem; display: flex; align-items: baseline; gap: 0.7rem; }
+.offre__prix b { font-family: var(--sc-font-display); font-size: clamp(2.6rem, 5vw, 4rem); font-weight: 600; line-height: 1; letter-spacing: -0.02em; }
+.offre__barre { font-size: 1.3rem; color: var(--gris-nuit); text-decoration: line-through; text-decoration-color: #F08A78; text-decoration-thickness: 2px; }
+.offre__ttc { font-size: 0.8rem; color: var(--gris-nuit-2); }
+.offre__note { margin: 0; color: var(--gris-nuit-2); font-size: 0.9rem; line-height: 1.6; max-width: 44ch; }
+.offre__achat { display: grid; gap: 0.9rem; align-content: start; }
+.offre__achat .btn { width: 100%; }
+.offre__liste { list-style: none; margin: 0; padding: 0; }
+.offre__liste li { padding: 0.5rem 0; border-bottom: 1px dashed color-mix(in oklab, var(--ivoire) 22%, transparent); font-size: 0.9rem; color: var(--gris-nuit-2); }
+.offre__liste li b { color: var(--ivoire); font-weight: 600; }
+.offre__mini { margin: 0; font-size: 0.76rem; color: var(--gris-nuit); }
+.offre__mini a, .offre__diag a { color: var(--gris-nuit-2); text-underline-offset: 0.22em; }
+.offre__diag {
+  grid-column: 1 / -1; margin: 0.4rem 0 0; padding-top: 1.1rem;
+  border-top: 1px dashed color-mix(in oklab, var(--ivoire) 22%, transparent);
+  font-size: 0.9rem; color: var(--gris-nuit-2);
+}
+
+/* ================================================================== 
+   FEUILLET 06 · LE TEST DE RÉCEPTION (pin · PIC)
+   ================================================================== */
+.test-stage {
+  display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(1.6rem, 4vw, 3.6rem); align-items: center;
+  padding-inline: var(--sc-gutter);
+  background: var(--nuit-peak); color: var(--ivoire);
+}
+.test-stage__fond {
+  position: absolute; top: 50%; left: 50%; translate: -50% -50%; pointer-events: none;
+  font-size: clamp(2.6rem, 8vw, 7.5rem); letter-spacing: 0.04em; white-space: nowrap;
+  color: transparent; -webkit-text-stroke: 1px color-mix(in oklab, var(--ivoire) 7%, transparent);
+}
+.test-stage__col { position: relative; z-index: 1; }
+.test-stage__col--propos { max-width: 34rem; }
+.test-stage__k { margin: 0 0 1.1rem; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gris-nuit-2); }
+.test-stage__titre {
+  font-family: var(--sc-font-display); font-weight: 600;
+  font-size: clamp(1.9rem, 3.4vw, 3.05rem); line-height: 1.06; letter-spacing: -0.02em;
+  margin: 0 0 1.1rem; text-wrap: balance;
+}
+.test-stage__lede { margin: 0 0 1.2rem; color: var(--gris-nuit-2); line-height: 1.65; font-size: 1.02rem; max-width: 40ch; }
+.test-stage__ko, .test-stage__ok { margin: 0 0 1.1rem; color: var(--gris-nuit-2); line-height: 1.6; font-size: 0.96rem; max-width: 38ch; }
+.test-stage__ko b { color: #F08A78; font-weight: 600; }
+.test-stage__ok b { color: #7FC69A; font-weight: 600; }
+.test-stage__cta { display: grid; gap: 0.6rem; align-items: start; }
+.test-stage__cta .btn { justify-self: start; }
+.test-stage__cta span { font-size: 0.68rem; letter-spacing: 0.05em; color: var(--gris-nuit); }
+.test-stage__ok { margin-top: 1.2rem; }
+
+/* la facture d'essai + ses états (pilotés par data-essai via landing.js) */
+.test-stage__col--essai { max-width: 46rem; justify-self: center; width: 100%; }
+.essai {
+  position: relative; width: min(100%, 520px); margin-inline: auto;
+  background: #FFFDF6; color: var(--encre); box-shadow: var(--sc-e3);
+  border: 1px solid color-mix(in oklab, var(--encre) 25%, transparent);
+  padding: clamp(1.1rem, 2vw, 1.7rem) clamp(1.2rem, 2.4vw, 2rem) 1.4rem;
+  transform: rotate(-1deg);
+}
+.essai__entete {
+  display: flex; justify-content: space-between; gap: 12px;
+  font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--encre-soft); border-bottom: 1px solid var(--sc-hairline-strong);
+  padding-bottom: 0.7rem; margin-bottom: 1rem;
+}
+.essai__parties, .essai__montant { margin: 0 0 0.7rem; }
+.essai__parties div, .essai__montant div { display: grid; grid-template-columns: 110px 1fr; gap: 10px; padding: 0.4rem 0; border-bottom: 1px dashed color-mix(in oklab, var(--encre) 22%, transparent); }
+.essai__parties dt, .essai__montant dt { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--encre-soft); padding-top: 0.15em; }
+.essai__parties dd, .essai__montant dd { margin: 0; font-size: 0.86rem; color: var(--encre); }
+.essai__montant dd { font-weight: 600; }
+.essai__cachet {
+  position: absolute; top: 44%; left: 50%; translate: -50% -50%;
+  font-family: var(--sc-font-mono); font-weight: 600; text-align: center;
+  text-transform: uppercase; letter-spacing: 0.14em; line-height: 1.3;
+  font-size: clamp(1rem, 2vw, 1.4rem); padding: 0.6em 1em; border-radius: 4px;
+  opacity: 0; pointer-events: none;
+}
+.essai__cachet--retour { border: 4px double var(--rouge-profond); color: var(--rouge-profond); rotate: -7deg; background: color-mix(in oklab, #fff 55%, transparent); }
+.essai__cachet--recu { border: 4px double var(--ok); color: var(--ok); rotate: 5deg; background: color-mix(in oklab, #fff 55%, transparent); }
+.essai__cause {
+  margin: 0.9rem 0 0; font-size: 0.7rem; letter-spacing: 0.03em;
+  color: var(--encre-soft); opacity: 0; pointer-events: none;
+}
+.test-stage__col--essai[data-essai="ko"] .essai__cachet--retour { opacity: 1; animation: essai-punch 0.34s var(--sc-ease-out); }
+.test-stage__col--essai[data-essai="ok"] .essai__cachet--recu { opacity: 1; animation: essai-punch 0.34s var(--sc-ease-out); }
+.test-stage__col--essai[data-essai="ko"] .essai__cause--ko { opacity: 1; }
+.test-stage__col--essai[data-essai="ok"] .essai__cause--ok { opacity: 1; }
+@keyframes essai-punch {
+  0% { opacity: 0; scale: 1.5; }
+  60% { opacity: 1; scale: 0.96; }
+  100% { opacity: 1; scale: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .test-stage__col--essai[data-essai="ko"] .essai__cachet--retour,
+  .test-stage__col--essai[data-essai="ok"] .essai__cachet--recu { animation: none; }
+}
+.essai__tick {
+  list-style: none; counter-reset: t; margin: 1.1rem 0 0; padding: 0;
+  display: grid; gap: 0.4rem; max-width: 520px; margin-inline: auto;
+}
+.essai__tick li {
+  counter-increment: t; position: relative; padding-left: 2.1rem;
+  font-size: 0.72rem; letter-spacing: 0.02em; line-height: 1.6; color: var(--gris-nuit-2);
+  opacity: 0.32;
+}
+.essai__tick li::before {
+  content: counter(t, decimal-leading-zero); position: absolute; left: 0; top: 0;
+  color: var(--gris-nuit); font-size: 0.66rem;
+}
+.test-stage__col--essai[data-essai="ok"] .essai__tick li { color: #CBE7D4; opacity: 1; }
+.test-stage__col--essai[data-essai="ok"] .essai__tick li[data-tick="1"] { transition-delay: 0s; }
+.test-stage__col--essai[data-essai="ok"] .essai__tick li::before { content: "✓"; color: #7FC69A; font-weight: 700; }
+.essai__note {
+  max-width: 520px; margin: 0.9rem auto 0; font-size: 0.62rem; letter-spacing: 0.04em;
+  color: var(--gris-nuit); line-height: 1.6;
+}
+
+/* ================================================================== 
+   FEUILLET 07 · FAQ (papier-2)
+   ================================================================== */
+#faq { padding-block: clamp(1.4rem, 4vh, 3rem) clamp(3.6rem, 10vh, 7rem); }
+.faq__wrap { max-width: 60rem; }
+.faq { margin-top: 0.6rem; }
+.faq details {
+  border-bottom: 1px solid color-mix(in oklab, var(--encre) 30%, transparent);
+}
+.faq summary {
+  cursor: pointer; list-style: none; position: relative;
+  font-family: var(--sc-font-text); font-weight: 600; font-size: 1.06rem; line-height: 1.4;
+  padding: 1.15rem 2.6rem 1.15rem 0; color: var(--encre);
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: "+"; position: absolute; right: 0.15rem; top: 50%; translate: 0 -50%;
+  font-family: var(--sc-font-mono); font-size: 1.3rem; font-weight: 400;
+  color: var(--verm); transition: rotate var(--sc-d-base) var(--sc-ease-out);
+}
+.faq details[open] summary::after { rotate: 45deg; }
+.faq details p {
+  margin: 0; padding: 0 2.4rem 1.3rem 0; color: var(--encre-soft);
+  line-height: 1.7; max-width: 66ch; font-size: 0.98rem;
+}
+.faq details p a { color: var(--bleu-lien); text-underline-offset: 0.2em; }
+
+/* ================================================================== 
+   FEUILLET 08 · COMMANDER + ANNEXES (blanc · close)
+   ================================================================== */
+#commande { padding-top: clamp(1.6rem, 5vh, 3.6rem); }
+.commande__grille {
+  display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(1.8rem, 5vw, 4.6rem); align-items: start;
+}
+.commande__k { margin: 0 0 1.1rem; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--verm-deep); }
+.commande__titre {
+  font-family: var(--sc-font-display); font-weight: 600;
+  font-size: clamp(1.85rem, 3.2vw, 2.9rem); line-height: 1.07; letter-spacing: -0.018em;
+  margin: 0 0 1.1rem; text-wrap: balance;
+}
+.commande__lede { margin: 0 0 1.5rem; color: var(--encre-soft); line-height: 1.66; max-width: 46ch; font-size: 1.02rem; }
+.commande__note { margin: 1.2rem 0 0; font-size: 0.9rem; color: var(--encre-soft); line-height: 1.6; }
+.commande__note a { color: var(--encre); font-weight: 500; }
+
+.formulaire {
+  display: grid; gap: 1rem; background: #fff; color: var(--encre);
+  border: 1px solid color-mix(in oklab, var(--encre) 22%, transparent);
+  box-shadow: var(--sc-e1); padding: clamp(1.2rem, 2.6vw, 2rem);
+}
+.champ { display: grid; gap: 0.4rem; }
+.champ label { font-size: 0.78rem; font-weight: 500; color: var(--encre); }
+.champ input[type="text"], .champ input[type="email"], .champ select, .champ textarea {
+  font-family: var(--sc-font-text); font-size: 0.98rem; color: var(--encre);
+  background: #fff; border: 1.5px solid color-mix(in oklab, var(--encre) 38%, transparent);
+  border-radius: var(--sc-r-sm); padding: 0.72em 0.85em; width: 100%;
+  transition: border-color var(--sc-d-fast) var(--sc-ease-out), box-shadow var(--sc-d-fast) var(--sc-ease-out);
+}
+.champ input:focus, .champ select:focus, .champ textarea:focus {
+  outline: none; border-color: var(--verm);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--verm) 18%, transparent);
+}
+.champ--consent { display: flex; gap: 0.6rem; align-items: flex-start; }
+.champ--consent input { margin-top: 0.28rem; accent-color: var(--verm); width: 1.05em; height: 1.05em; }
+.champ--consent label { font-size: 0.8rem; color: var(--encre-soft); line-height: 1.55; font-weight: 400; }
+.champ--consent label a { color: var(--bleu-lien); }
+.formulaire__statut { min-height: 1.4em; margin: 0; font-size: 0.86rem; font-weight: 500; }
+.formulaire__statut[data-etat="ok"] { color: var(--ok); }
+.formulaire__statut[data-etat="erreur"] { color: var(--verm-deep); }
+.note-rgpd { margin: 0; font-size: 0.72rem; line-height: 1.6; color: var(--encre-soft); }
+
+/* ------------------------------------------------------------- annexes -- */
+.annexes {
+  margin-top: clamp(3rem, 8vh, 5.5rem);
+  border-top: 2px solid var(--encre);
+  background: var(--papier-2); color: var(--encre);
+  padding-block: clamp(1.8rem, 5vh, 3rem) clamp(1.4rem, 4vh, 2.4rem);
+}
+.annexes__titre { margin: 0 0 1.8rem; font-size: 0.7rem; letter-spacing: 0.22em; color: var(--encre-soft); }
+.annexes__grille {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.4rem, 3vw, 2.6rem) clamp(2rem, 5vw, 4.5rem);
+}
+.annexes__bloc h3 { font-size: 0.98rem; font-weight: 600; margin: 0 0 0.7rem; }
+.annexes__bloc p { margin: 0 0 0.8rem; font-size: 0.84rem; line-height: 1.66; color: var(--encre-soft); }
+.annexes__bloc .mono { font-size: 0.72rem; color: var(--encre-soft); margin-top: 1rem; }
+.annexes__sources { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+.annexes__sources a { font-size: 0.85rem; line-height: 1.5; color: var(--bleu-lien); text-underline-offset: 0.2em; }
+.annexes__avertissement {
+  margin-top: clamp(1.6rem, 4vh, 2.4rem); padding: 1rem 1.2rem;
+  border-left: 2px solid var(--verm); background: color-mix(in oklab, var(--papier) 55%, transparent);
+}
+.annexes__avertissement p { margin: 0; font-size: 0.78rem; line-height: 1.65; color: var(--encre-soft); max-width: 80ch; }
+.annexes__avertissement a { color: var(--encre); }
+.annexes__socle {
+  margin-top: clamp(1.6rem, 4vh, 2.4rem); padding-top: 1.1rem;
+  border-top: 1px solid color-mix(in oklab, var(--encre) 30%, transparent);
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1.6rem; justify-content: space-between;
+  font-size: 0.78rem; color: var(--encre-soft);
+}
+.annexes__socle a { color: var(--encre); text-underline-offset: 0.2em; }
+
+/* ================================================================== 
+   RÉDUIT & MOBILE
+   ================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .essai { transform: none; }
+}
+
+@media (max-width: 980px) {
+  .couverture__grille { grid-template-columns: minmax(0, 1fr); }
+  .couverture__feuille { justify-self: start; width: min(100%, 440px); margin-top: 2rem; }
+  .couverture__filigrane { font-size: clamp(3.4rem, 20vw, 8.5rem); }
+  .rep { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; }
+  .rep__date { margin: 0; }
+  .piece { grid-template-columns: minmax(0, 1fr); gap: 0.8rem; }
+  .piece__compte { justify-self: start; }
+  .offre { grid-template-columns: minmax(0, 1fr); }
+  .commande__grille { grid-template-columns: minmax(0, 1fr); }
+  .sform h3 { padding-right: 0; }
+  .sform .tampon { position: static; justify-self: start; margin-bottom: 0.3rem; }
+}
+
+@media (max-width: 860px) {
+  .test-stage { grid-template-columns: minmax(0, 1fr); overflow-y: auto; align-content: start; gap: 1rem; padding-block: 1.2rem 2rem; }
+  .test-stage__col--propos { max-width: 40rem; }
+  .test-stage__titre { font-size: clamp(1.7rem, 6.2vw, 2.5rem); }
+  .test-stage__k, .test-stage__lede { display: none; }
+  .essai { width: min(100%, 440px); }
+  .essai__tick { max-width: 440px; }
+  .essai__note { max-width: 440px; }
+  .folio__titre { display: none; }
+  .echeancier__rail { align-items: stretch; padding-block: 0; }
+  .rail__entete { display: flex; flex-direction: column; justify-content: center; }
+  .jalon { align-self: center; }
+  .rail__note { align-self: center; }
+}
+
+@media (max-width: 700px) {
+  .folio__lien { display: none; }
+  .folio .btn { font-size: 0.78rem; padding: 0.58em 0.8em; }
+  .couverture__actions .btn { width: 100%; }
+  .sform__actions .btn { flex: 1 1 100%; }
+  .annexes__grille { grid-template-columns: minmax(0, 1fr); }
+  .couverture__marge { display: none; }
+  .couverture__filigrane-bis { display: none; }
+}
