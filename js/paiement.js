@@ -2,7 +2,7 @@
    Le Payment Link est créé via l'API Stripe (POST /v1/payment_links),
    produit : « Pack Prêt à recevoir — Facturation électronique 2026 », 29,00 EUR.
    Cette URL est publique par conception (lien de paiement Stripe).
-   Toute commande (sujet = commande) capture le lead EmailJS PUIS redirige ici. */
+   Les boutons d'achat du site pointent directement vers cette URL (sans formulaire). */
 (function (root) {
   'use strict';
 
