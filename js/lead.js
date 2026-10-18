@@ -102,7 +102,7 @@
 
   function estCommande(form) {
     var sujet = form.querySelector('[name="sujet"]');
-    return !sujet || sujet.value === 'commande';
+    return !!sujet && sujet.value === 'commande'; /* l'achat passe désormais directement par le lien Stripe */
   }
 
   function redirigerVersPaiement() {
