@@ -19,7 +19,7 @@
     <nav class="en-tete__nav" aria-label="Navigation">
       <a class="en-tete__lien" href="index.html#reglementaire">La réforme</a>
       <a class="en-tete__lien" href="index.html#pack">Le pack</a>
-      <a class="btn btn-primaire" href="index.html#commande">Commander (29 €)</a>
+      <a class="btn btn-primaire" href="https://buy.stripe.com/8x28wR5YO3LL7rfeKwfrW0o" rel="noopener">Commander (29 €)</a>
     </nav>
   </div>
 </header>
@@ -63,7 +63,7 @@
       <h2 class="h2">Un score, puis un plan. Le pack fait le reste.</h2>
       <p class="intro">La checklist « Prêt à recevoir » (12 points), le guide de choix de plateforme et le mémo des mentions obligatoires : 29 € au lieu de 49 €, livrés par email sous 24 h ouvrées.</p>
       <div style="margin-top:28px; display:flex; flex-wrap:wrap; gap:16px; align-items:center;">
-        <a class="btn btn-primaire" href="index.html#commande">Commander le pack (29 €)</a>
+        <a class="btn btn-primaire" href="https://buy.stripe.com/8x28wR5YO3LL7rfeKwfrW0o" rel="noopener">Commander le pack (29 €)</a>
         <a class="btn btn-nuit" href="index.html">Revenir à l'accueil</a>
       </div>
     </div>
@@ -96,10 +96,7 @@
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js" defer></script>
 <script src="js/prix.js" defer></script>
-<script src="js/emailjs-config.js" defer></script>
-<script src="js/lead.js" defer></script>
 <!-- diagnostic.js est chargé en synchrone : le contrôleur UI ci-dessous en dépend immédiatement -->
 <script src="js/diagnostic.js"></script>
 <script>
@@ -162,7 +159,7 @@
     var horsPerimetre = v.code === 'HORS PÉRIMÈTRE';
     var ctaHtml = horsPerimetre
       ? '<a class="btn btn-papier" href="index.html">Revenir à l\'accueil</a>'
-      : '<a class="btn btn-primaire" href="index.html#commande">Commander le pack (29 €)</a>' +
+      : '<a class="btn btn-primaire" href="https://buy.stripe.com/8x28wR5YO3LL7rfeKwfrW0o" rel="noopener">Commander le pack (29 €)</a>' +
         '<a class="btn btn-papier" href="index.html">Revenir à l\'accueil</a>';
     var noteHtml = horsPerimetre
       ? 'Ce résultat est un point de départ : la notion d\'assujettissement a des cas limites (associations, exonérations, seuils). Faites confirmer votre régime par un expert-comptable. Si vous êtes en franchise en base de TVA (micro-entrepreneur), vous êtes en réalité concerné·e — répondez « oui » à la question 1 et refaites le diagnostic.'
